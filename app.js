@@ -10,15 +10,21 @@ const Routes = require("./routes");
 
 const app = express();
 
+/*
 https
 	.createServer(
 		{
-			key: fs.readFileSync("./key.key"),
-			cert: fs.readFileSync("./sslcert.pem"),
+			key: fs.readFileSync("./privkey2.pem"),
+			cert: fs.readFileSync("./cert.pem"),
 		},
 		app
 	)
 	.listen(3001, () => console.log("Listening on port 3001"));
+*/
+
+http.createServer(app).listen(3001, () =>
+	console.log("Listening on port 3001")
+);
 
 mongoose
 	.connect(
