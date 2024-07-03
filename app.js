@@ -13,7 +13,7 @@ const app = express();
 https
 	.createServer(
 		{
-			key: fs.readFileSync("./privkey.pem"),
+			key: fs.readFileSync("./key.pem"),
 			cert: fs.readFileSync("./cert.pem"),
 		},
 		app
