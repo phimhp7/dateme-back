@@ -167,9 +167,6 @@ router.get("/getmatches/:id", async (req, res) => {
 		if (!bracelet) {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
-		if (bracelet.user_password !== decoded.user_password) {
-			return res.status(401).json({ error: "Invalid token" });
-		}
 		const matches = bracelet.matches.filter(
 			(match) => match.matched === true
 		);
