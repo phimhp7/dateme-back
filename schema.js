@@ -8,11 +8,11 @@ const MatchSchema = new mongoose.Schema({
 	},
 	options: {
 		type: String,
-		required: true,
+		required: false,
 	},
 	message: {
 		type: String,
-		required: true,
+		required: false,
 	},
 	matched: {
 		type: Boolean,
