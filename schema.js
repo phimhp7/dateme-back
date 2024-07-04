@@ -1,6 +1,31 @@
 const { default: mongoose } = require("mongoose");
 const { format } = require("morgan");
 
+const MatchSchema = new mongoose.Schema({
+	id: {
+		type: Number,
+		required: true,
+	},
+	options: {
+		type: String,
+		required: true,
+	},
+	message: {
+		type: String,
+		required: true,
+	},
+	matched: {
+		type: Boolean,
+	},
+});
+
+const DMSentSchema = new mongoose.Schema({
+	id: {
+		type: Number,
+		required: true,
+	},
+});
+
 const BraceletsData = new mongoose.Schema({
 	id: {
 		type: Number,
@@ -16,6 +41,14 @@ const BraceletsData = new mongoose.Schema({
 	},
 	user_choice: {
 		type: String,
+		required: false,
+	},
+	matches: {
+		type: [MatchSchema],
+		required: false,
+	},
+	DM_sent: {
+		type: [DMSentSchema],
 		required: false,
 	},
 });

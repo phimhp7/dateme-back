@@ -91,116 +91,81 @@ router.put("/updatepassword", async (req, res) => {
 	}
 });
 
-/*
+// Fonction pour envoyer un message
 
-router.get("/user/:username", async (req, res) => {
-	const { username } = req.params;
-	try {
-		let user = await Scoring.findOne({ username: username });
-		if (!user) {
-			user = new Scoring({ username, score: 99999999 });
-			await user.save();
-		}
-		const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-		res.json({ user, token });
-	} catch (error) {
-		res.status(500).json({
-			error: "There was an error fetching/creating the user",
-		});
-	}
-});
-
-router.post("/newscore", async (req, res) => {
-	const { username, score } = req.body;
-	const scoring = new Scoring({
-		username,
-		score,
-	});
-	await scoring.save();
-	res.send(scoring);
-});
-
-router.get("/getallscore", async (req, res) => {
-	Scoring.find()
-		.sort({ score: 1 })
-		.limit(10)
-		.then((scores) => res.json(scores))
-		.catch((err) => res.status(400).json("Error: " + err));
-});
-
-router.delete("/clearscores", async (req, res) => {
-	try {
-		await Scoring.deleteMany({});
-		res.json({ message: "Scores cleared successfully." });
-	} catch (err) {
-		res.status(500).json({
-			error: "An error occurred while clearing scores: " + err,
-		});
-	}
-});
-
-router.post("/checktoken", async (req, res) => {
-	const { token } = req.body;
+router.put("/sendmessage/:id", async (req, res) => {
+	const { id } = req.params;
+	const { message, numero_client, token } = req.body;
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		const user = await Scoring.findById(decoded.userId);
-		if (!user) {
+		const bracelet = await Bracelets.findOne({ id: numero_client });
+		const bracelet_crush = await Bracelets.findOne({ id: id });
+		if (!bracelet || !bracelet_crush) {
+			return res.status(404).json({ error: "Bracelet not found" });
+		}
+		if (bracelet.user_password !== decoded.user_password) {
 			return res.status(401).json({ error: "Invalid token" });
 		}
-		res.json({ user });
-	} catch (error) {
-		res.status(401).json({ error: "Invalid token" });
+		if (
+			bracelet_crush.matches.some((match) => match.id === bracelet.id) &&
+			bracelet.matches.some((match) => match.id === bracelet_crush.id)
+		) {
+			bracelet.matches.forEach((match) => {
+				if (match.id === bracelet_crush.id) {
+					match.message = message;
+					match.matched = true;
+				}
+			});
+			bracelet_crush.matches.forEach((match) => {
+				if (match.id === bracelet.id) {
+					match.matched = true;
+				}
+			});
+			await bracelet.save();
+			await bracelet_crush.save();
+		} else {
+			bracelet_crush.matches.push({
+				id: bracelet.id,
+				message: message,
+				matched: false,
+			});
+			await bracelet_crush.save();
+			bracelet.matches.push({
+				id: bracelet_crush.id,
+				message: "",
+				matched: false,
+			});
+			await bracelet.save();
+		}
+	} catch (err) {
+		res.status(500).json({
+			error: "An error occurred while sending message: " + err,
+		});
 	}
 });
 
-router.post("/updatescore", async (req, res) => {
-	const { score, token } = req.body;
+// Fonction pour récupérer les matchs
+
+router.get("/getmatches", async (req, res) => {
+	const { id, token } = req.body;
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		const user = await Scoring.findById(decoded.userId);
-		if (!user) {
+		const bracelet = await Bracelets.findOne({ id: id });
+		if (!bracelet) {
+			return res.status(404).json({ error: "Bracelet not found" });
+		}
+		if (bracelet.user_password !== decoded.user_password) {
 			return res.status(401).json({ error: "Invalid token" });
 		}
-		if (score < user.score && score > 45) {
-			user.score = score;
-			await user.save();
-		}
-		res.json({ user, score });
-	} catch (error) {
-		console.log(error);
-		res.status(500).json({
-			error: "There was an error updating the score",
-		});
-	}
-});
-
-router.delete("/deletescore/:id", async (req, res) => {
-	try {
-		await Scoring.findByIdAndDelete(req.params.id);
-		res.json({ message: "Score deleted successfully." });
+		const matches = bracelet.matches.filter(
+			(match) => match.matched === true
+		);
+		res.json({ matches });
 	} catch (err) {
 		res.status(500).json({
-			error: "An error occurred while deleting score: " + err,
+			error: "An error occurred while fetching matches: " + err,
 		});
 	}
 });
-
-router.get("/gettotalscore", async (req, res) => {
-	try {
-		const scores = await Scoring.find();
-		let totalScore = 0;
-
-		scores.forEach((score) => {
-			totalScore += score.score;
-		});
-
-		res.json({ totalScore, scores });
-	} catch (err) {
-		res.status(500).json({
-			error: "An error occurred while fetching total scores: " + err,
-		});
-	}
-});
-*/
 
 module.exports = router;
