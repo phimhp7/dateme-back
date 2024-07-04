@@ -160,10 +160,10 @@ router.put("/sendmessage/:id", async (req, res) => {
 
 // Fonction pour récupérer les matchs
 
-router.get("/getmatches", async (req, res) => {
-	const { number } = req.body;
+router.get("/getmatches/:id", async (req, res) => {
+	const { id } = req.params;
 	try {
-		const bracelet = await Bracelets.findOne({ id: number });
+		const bracelet = await Bracelets.findOne({ id: id });
 		if (!bracelet) {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
