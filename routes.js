@@ -102,7 +102,11 @@ router.put("/sendmessage/:id", async (req, res) => {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		const bracelet = await Bracelets.findOne({ id: numero_client });
 		const bracelet_crush = await Bracelets.findOne({ id: id });
-		if (!bracelet || !bracelet_crush) {
+		if (
+			!bracelet ||
+			!bracelet_crush ||
+			bracelet_crush.user_password === ""
+		) {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
 		if (bracelet.user_password !== decoded.user_password) {
