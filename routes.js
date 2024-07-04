@@ -161,9 +161,8 @@ router.put("/sendmessage/:id", async (req, res) => {
 // Fonction pour récupérer les matchs
 
 router.get("/getmatches", async (req, res) => {
-	const { id, token } = req.body;
+	const { id } = req.body;
 	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		const bracelet = await Bracelets.findOne({ id: id });
 		if (!bracelet) {
 			return res.status(404).json({ error: "Bracelet not found" });
