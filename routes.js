@@ -130,12 +130,14 @@ router.put("/sendmessage/:id", async (req, res) => {
 				id: bracelet.id,
 				message: message,
 				matched: false,
+				options: bracelet.user_choice,
 			});
 			await bracelet_crush.save();
 			bracelet.matches.push({
 				id: bracelet_crush.id,
 				message: "",
 				matched: false,
+				options: bracelet_crush.user_choice,
 			});
 			await bracelet.save();
 		}
