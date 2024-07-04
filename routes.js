@@ -23,6 +23,7 @@ router.put("/init", async (req, res) => {
 			id_mdp: id_md_first + i,
 			user_password: "",
 			user_choice: "",
+			matches: [],
 		});
 		await bracelet.save();
 	}
