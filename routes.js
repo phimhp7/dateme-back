@@ -161,7 +161,7 @@ router.put("/sendmessage/:id", async (req, res) => {
 // Fonction pour récupérer les matchs
 
 router.get("/getmatches", async (req, res) => {
-	const { id } = req.body;
+	const { number } = req.body;
 	try {
 		const bracelet = await Bracelets.findOne({ id: id });
 		if (!bracelet) {
