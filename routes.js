@@ -144,7 +144,6 @@ router.put("/sendmessage/:id", async (req, res) => {
 			await bracelet_crush.save();
 			bracelet.matches.push({
 				id: bracelet_crush.id,
-				message: "",
 				matched: false,
 				options: bracelet_crush.user_choice,
 			});
