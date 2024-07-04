@@ -108,6 +108,11 @@ router.put("/sendmessage/:id", async (req, res) => {
 		if (bracelet.user_password !== decoded.user_password) {
 			return res.status(401).json({ error: "Invalid token" });
 		}
+		if (bracelet.DM_sent.some((DM) => DM.id === bracelet_crush.id)) {
+			return res.status(400).json({
+				error: "Message already sent to this bracelet",
+			});
+		}
 		if (
 			bracelet_crush.matches.some((match) => match.id === bracelet.id) &&
 			bracelet.matches.some((match) => match.id === bracelet_crush.id)
@@ -139,6 +144,7 @@ router.put("/sendmessage/:id", async (req, res) => {
 				matched: false,
 				options: bracelet_crush.user_choice,
 			});
+			bracelet.DM_sent.push({ id: bracelet_crush.id });
 			await bracelet.save();
 		}
 	} catch (err) {
