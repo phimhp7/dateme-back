@@ -69,7 +69,7 @@ router.delete("/deletebracelet/:id_bracelet", async (req, res) => {
 // Changement du mot de passe d'un bracelet
 
 router.put("/updatepassword", async (req, res) => {
-	const { id, id_pas, password } = req.body;
+	const { id, id_pas, password, choice } = req.body;
 	try {
 		const bracelet = await Bracelets.findOne({ id: id });
 		if (!bracelet) {
@@ -79,6 +79,7 @@ router.put("/updatepassword", async (req, res) => {
 			return res.status(401).json({ error: "Invalid password" });
 		}
 		bracelet.user_password = password;
+		bracelet.user_choice = choice;
 		await bracelet.save();
 		const token = jwt.sign(
 			{ user_password: bracelet.user_password },
