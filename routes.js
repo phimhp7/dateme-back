@@ -66,7 +66,7 @@ router.delete("/deletebracelet/:id_bracelet", async (req, res) => {
 	}
 });
 
-// Changement du mot de passe d'un bracelet
+// Changement du mot de passe d'un bracelet (register)
 
 router.put("/updatepassword", async (req, res) => {
 	const { id, id_pas, password, choice } = req.body;
@@ -89,6 +89,30 @@ router.put("/updatepassword", async (req, res) => {
 	} catch (err) {
 		res.status(500).json({
 			error: "An error occurred while updating password: " + err,
+		});
+	}
+});
+
+// fontion login pour un bracelet
+
+router.post("/login", async (req, res) => {
+	const { id, password } = req.body;
+	try {
+		const bracelet = await Bracelets.findOne({ id: id });
+		if (!bracelet) {
+			return res.status(404).json({ error: "Bracelet not found" });
+		}
+		if (bracelet.user_password !== password) {
+			return res.status(401).json({ error: "Invalid password" });
+		}
+		const token = jwt.sign(
+			{ user_password: bracelet.user_password },
+			process.env.JWT_SECRET
+		);
+		res.json({ bracelet, token });
+	} catch (err) {
+		res.status(500).json({
+			error: "An error occurred while logging in: " + err,
 		});
 	}
 });
