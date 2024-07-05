@@ -110,7 +110,8 @@ router.put("/sendmessage/:id", async (req, res) => {
 		if (
 			!bracelet ||
 			!bracelet_crush ||
-			bracelet_crush.user_password === ""
+			bracelet_crush.user_password === "" ||
+			id === numero_client
 		) {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
@@ -136,13 +137,13 @@ router.put("/sendmessage/:id", async (req, res) => {
 			// Update matches if mutual match exists
 			bracelet.matches.forEach((match) => {
 				if (match.id === bracelet_crush.id) {
-					match.message = message;
 					match.matched = true;
 				}
 			});
 
 			bracelet_crush.matches.forEach((match) => {
 				if (match.id === bracelet.id) {
+					match.message = message;
 					match.matched = true;
 				}
 			});
@@ -211,6 +212,7 @@ router.delete("/deletematches/:id", async (req, res) => {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
 		bracelet.matches = [];
+		bracelet.DM_sent = [];
 		await bracelet.save();
 		res.json({ message: "Matches deleted successfully" });
 	} catch (err) {
