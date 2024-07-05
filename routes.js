@@ -99,9 +99,14 @@ router.put("/sendmessage/:id", async (req, res) => {
 	const { id } = req.params;
 	const { message, numero_client, token } = req.body;
 	try {
+		// Verify the token
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+		// Find the bracelets
 		const bracelet = await Bracelets.findOne({ id: numero_client });
 		const bracelet_crush = await Bracelets.findOne({ id: id });
+
+		// Check if bracelets exist and if the crush bracelet has a user password
 		if (
 			!bracelet ||
 			!bracelet_crush ||
@@ -109,47 +114,66 @@ router.put("/sendmessage/:id", async (req, res) => {
 		) {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
+
+		// Verify the user password from the token
 		if (bracelet.user_password !== decoded.user_password) {
 			return res.status(401).json({ error: "Invalid token" });
 		}
+
+		// Check if a message has already been sent to the crush bracelet
 		if (bracelet.DM_sent.some((DM) => DM.id === bracelet_crush.id)) {
-			return res.status(400).json({
-				error: "Message already sent to this bracelet",
-			});
+			return res
+				.status(400)
+				.json({ error: "Message already sent to this bracelet" });
 		}
-		if (
+
+		// Check if there is a mutual match
+		const isMutualMatch =
 			bracelet_crush.matches.some((match) => match.id === bracelet.id) &&
-			bracelet.matches.some((match) => match.id === bracelet_crush.id)
-		) {
+			bracelet.matches.some((match) => match.id === bracelet_crush.id);
+
+		if (isMutualMatch) {
+			// Update matches if mutual match exists
 			bracelet.matches.forEach((match) => {
 				if (match.id === bracelet_crush.id) {
 					match.message = message;
 					match.matched = true;
 				}
 			});
+
 			bracelet_crush.matches.forEach((match) => {
 				if (match.id === bracelet.id) {
 					match.matched = true;
 				}
 			});
-			await bracelet.save();
-			await bracelet_crush.save();
 		} else {
+			// Add new match entries if no mutual match
 			bracelet_crush.matches.push({
 				id: bracelet.id,
 				message: message,
 				matched: false,
 				options: bracelet.user_choice,
 			});
-			await bracelet_crush.save();
+
 			bracelet.matches.push({
 				id: bracelet_crush.id,
 				matched: false,
 				options: bracelet_crush.user_choice,
 			});
+
+			// Record the DM sent
 			bracelet.DM_sent.push({ id: bracelet_crush.id });
-			await bracelet.save();
 		}
+
+		// Save the updated bracelets
+		await bracelet.save();
+		await bracelet_crush.save();
+
+		// Send success response
+		res.status(200).json({
+			success: true,
+			message: "Message sent successfully",
+		});
 	} catch (err) {
 		res.status(500).json({
 			error: "An error occurred while sending message: " + err,
