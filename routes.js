@@ -251,4 +251,22 @@ router.delete("/deletematches/:id", async (req, res) => {
 	}
 });
 
+// Fonction pour effacer les matchs de tous les bracelets
+
+router.delete("/deletematches", async (req, res) => {
+	try {
+		const bracelets = await Bracelets.find();
+		bracelets.forEach(async (bracelet) => {
+			bracelet.matches = [];
+			bracelet.DM_sent = [];
+			await bracelet.save();
+		});
+		res.json({ message: "Matches deleted successfully" });
+	} catch (err) {
+		res.status(500).json({
+			error: "An error occurred while deleting matches: " + err,
+		});
+	}
+});
+
 module.exports = router;
