@@ -78,6 +78,11 @@ router.put("/updatepassword", async (req, res) => {
 		if (bracelet.id_mdp !== id_pas) {
 			return res.status(401).json({ error: "Invalid password" });
 		}
+		if (bracelet.user_password !== "") {
+			return res.status(400).json({
+				error: "Bracelet already registered",
+			});
+		}
 		bracelet.user_password = password;
 		bracelet.user_choice = choice;
 		await bracelet.save();
