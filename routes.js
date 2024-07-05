@@ -201,4 +201,23 @@ router.get("/getmatches/:id", async (req, res) => {
 	}
 });
 
+// Fonction pour effacer tout les matchs
+
+router.delete("/deletematches/:id", async (req, res) => {
+	const { id } = req.params;
+	try {
+		const bracelet = await Bracelets.findOne({ id: id });
+		if (!bracelet) {
+			return res.status(404).json({ error: "Bracelet not found" });
+		}
+		bracelet.matches = [];
+		await bracelet.save();
+		res.json({ message: "Matches deleted successfully" });
+	} catch (err) {
+		res.status(500).json({
+			error: "An error occurred while deleting matches: " + err,
+		});
+	}
+}
+
 module.exports = router;
