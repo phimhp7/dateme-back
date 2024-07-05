@@ -218,6 +218,6 @@ router.delete("/deletematches/:id", async (req, res) => {
 			error: "An error occurred while deleting matches: " + err,
 		});
 	}
-}
+});
 
 module.exports = router;
