@@ -17,6 +17,9 @@ const MatchSchema = new mongoose.Schema({
 	matched: {
 		type: String,
 	},
+	matchTime: {
+		type: Date,
+	},
 });
 
 const DMSentSchema = new mongoose.Schema({

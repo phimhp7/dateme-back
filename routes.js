@@ -261,10 +261,14 @@ router.put("/approvematch/:id", async (req, res) => {
 		// Update the matched status
 		if (approve === "yes") {
 			match.matched = "yes";
+			match.matchTime = new Date();
 			match_crush.matched = "yes";
+			match_crush.matchTime = new Date();
 		} else {
 			match.matched = "no";
+			match_crush.matchTime = new Date();
 			match_crush.matched = "no";
+			match_crush.matchTime = new Date();
 		}
 
 		// Save the updated documents
