@@ -158,7 +158,7 @@ router.put("/sendmessage/:id", async (req, res) => {
 
 		bracelet.matches.push({
 			id: bracelet_crush.id,
-			matched: "notyet",
+			matched: "envoyé",
 			options: bracelet_crush.user_choice,
 		});
 
@@ -222,19 +222,35 @@ router.get("/getmessages/:id", async (req, res) => {
 router.put("/approvematch/:id", async (req, res) => {
 	const { id } = req.params;
 	const { id_crush, approve } = req.body;
+
 	try {
-		const bracelet = await Bracelets.findOne({ id: id });
+		if (approve !== "yes" && approve !== "no") {
+			return res.status(400).json({
+				error: "Invalid value for approve. Must be 'yes' or 'no'.",
+			});
+		}
+
+		const bracelet = await Bracelets.findOne({ id });
 		const bracelet_crush = await Bracelets.findOne({ id: id_crush });
+
 		if (!bracelet || !bracelet_crush) {
 			return res.status(404).json({ error: "Bracelet not found" });
 		}
+
+		// Debugging: Log the matches arrays
+		console.log("Bracelet matches:", bracelet.matches);
+		console.log("Bracelet crush matches:", bracelet_crush.matches);
+
 		const match = bracelet.matches.find((match) => match.id === id_crush);
 		const match_crush = bracelet_crush.matches.find(
 			(match) => match.id === id
 		);
+
 		if (!match || !match_crush) {
+			console.log("Match not found:", { match, match_crush });
 			return res.status(404).json({ error: "Match not found" });
 		}
+
 		if (approve === "yes") {
 			match.matched = "yes";
 			match_crush.matched = "yes";
@@ -242,12 +258,14 @@ router.put("/approvematch/:id", async (req, res) => {
 			match.matched = "no";
 			match_crush.matched = "no";
 		}
+
 		await bracelet.save();
 		await bracelet_crush.save();
-		res.json({ message: "Match approved successfully" });
+
+		res.json({ message: "Match status updated successfully" });
 	} catch (err) {
 		res.status(500).json({
-			error: "An error occurred while approving match: " + err,
+			error: "An error occurred while updating match: " + err.message,
 		});
 	}
 });
