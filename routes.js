@@ -230,27 +230,34 @@ router.put("/approvematch/:id", async (req, res) => {
 			});
 		}
 
-		const bracelet = await Bracelets.findOne({ id });
-		const bracelet_crush = await Bracelets.findOne({ id: id_crush });
+		// Ensure the id and id_crush are of the same type
+		const braceletId = parseInt(id);
+		const crushId = parseInt(id_crush);
 
-		if (!bracelet || !bracelet_crush) {
-			return res.status(404).json({ error: "Bracelet not found" });
-		}
+		// Fetch the bracelets
+		const bracelet = await Bracelets.findOne({ id: braceletId });
+		const bracelet_crush = await Bracelets.findOne({ id: crushId });
 
-		// Debugging: Log the matches arrays
-		console.log("Bracelet matches:", bracelet.matches);
-		console.log("Bracelet crush matches:", bracelet_crush.matches);
+		// Debug: Check the retrieved bracelet objects
+		console.log("Bracelet:", bracelet);
+		console.log("Bracelet Crush:", bracelet_crush);
 
-		const match = bracelet.matches.find((match) => match.id === id_crush);
+		// Find the match within the matches array
+		const match = bracelet.matches.find((match) => match.id === crushId);
 		const match_crush = bracelet_crush.matches.find(
-			(match) => match.id === id
+			(match) => match.id === braceletId
 		);
+
+		// Debug: Log the found matches
+		console.log("Found match:", match);
+		console.log("Found match_crush:", match_crush);
 
 		if (!match || !match_crush) {
 			console.log("Match not found:", { match, match_crush });
 			return res.status(404).json({ error: "Match not found" });
 		}
 
+		// Update the matched status
 		if (approve === "yes") {
 			match.matched = "yes";
 			match_crush.matched = "yes";
@@ -259,6 +266,7 @@ router.put("/approvematch/:id", async (req, res) => {
 			match_crush.matched = "no";
 		}
 
+		// Save the updated documents
 		await bracelet.save();
 		await bracelet_crush.save();
 
