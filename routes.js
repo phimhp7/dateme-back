@@ -138,7 +138,8 @@ router.put("/sendmessage/:id", async (req, res) => {
 			!bracelet ||
 			!bracelet_crush ||
 			bracelet_crush.user_password === "" ||
-			id === numero_client
+			id === numero_client ||
+			bracelet.DM_sent.find((DM) => DM.id === bracelet_crush.id)
 		) {
 			return res
 				.status(404)
