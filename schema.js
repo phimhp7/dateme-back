@@ -15,7 +15,7 @@ const MatchSchema = new mongoose.Schema({
 		required: false,
 	},
 	matched: {
-		type: Boolean,
+		type: String,
 	},
 });
 
